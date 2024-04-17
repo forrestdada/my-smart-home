@@ -1,0 +1,76 @@
+$def with (temp, humi, motion_string)
+<html>
+  <head>
+    <meta http-equiv="refresh" content="2" />
+    <title>Home Automation Monitoring Board</title>
+    <style>
+      .title {
+        text-align: center;
+      }
+
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      .box {
+        width: 200px;
+        height: 200px;
+        margin: 20px;
+        text-align: center;
+        border: 1px solid black;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">Home Automation Monitoring Board</h1>
+    <div class="container">
+      <div class="box">
+        $temp
+        <br />
+        <br />
+        <span>Temperature</span>
+      </div>
+      <div class="box">
+        $humi
+        <br />
+        <br />
+        <span>Humidity</span>
+      </div>
+      <div class="box">
+        $motion_string
+        <br />
+        <br />
+        <span>Motion Detector</span>
+      </div>
+      <div class="box">
+        <button onclick="openLight()" class="lightBtn" type="button">OPEN</button>
+        <button onclick="closeLight()" class="lightBtn" type="button">CLOSE</button>
+        <br />
+        <br />
+        <span>Light</span>
+      </div>
+      <div class="box">
+        <img src="/pic"  alt="PIC FROM CAMERA" width="160" height="120">
+        <span>Image</span>
+      </div>
+    </div>
+    
+    <script>
+      
+      function openLight() {
+          var xhttp = new XMLHttpRequest();
+          xhttp.open("GET", "/openL", true);
+          xhttp.send();
+      }
+      
+      function closeLight() {
+        var xhttp = new XMLHttpRequest();
+        xhttp.open("GET", "/closeL", true);
+        xhttp.send();
+      }
+      
+    </script>
+  </body>
+</html>
