@@ -1,0 +1,284 @@
+$def with (temp, humi, motion, gas)
+<html>
+  <head>
+    <meta http-equiv="refresh" content="2" />
+    <title>Home Automation Monitoring Board</title>
+    <style>
+      /* 修改标题样式 */
+      .title {
+        text-align: center;
+        font-size: 2em;
+        margin-bottom: 20px;
+      }
+
+      /* 容器样式 */
+      .container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin: 0 auto;
+        max-width: 1350px; /* 根据三个 box 的宽度调整此值 */
+      }
+
+      /* box 样式 */
+      .box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: space-between;
+        width: calc(33.333% - 20px); /* 计算三个 box 之间的距离 */
+        box-sizing: border-box;
+        padding: 20px;
+        margin-bottom: 20px;
+        background-color: #f5f5f5;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      /* 为了使第四个 box 和第五个 box 在同一行，可以为它们添加一个特殊的类名 */
+      .box:nth-child(4),
+      .box:nth-child(5) {
+        width: calc(50% - 20px); /* 计算两个 box 之间的距离 */
+      }
+
+      /* 新增 large-box 样式 */
+      .picBox {
+        width: calc(50% - 20px); /* 根据需要调整宽度 */
+        margin: 0 auto 20px; /* 居中并设置下边距 */
+      }
+
+      /* 为最后一个 box 的图片设置更大的尺寸 */
+      .picBox img {
+        width: 200px;
+        height: 150px;
+      }
+
+      /* 上部分文本、图片和按钮样式 */
+      .box p,
+      .box img,
+      .box button {
+        font-size: 1.2em;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      .box img {
+        width: 160px;
+        height: 120px;
+        object-fit: cover;
+      }
+
+      .box button {
+        padding: 10px 20px;
+        font-size: 1em;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
+      .onBtn {
+        background-color: rgb(199, 217, 251);
+      }
+
+      .offBtn {
+        background-color: rgb(255, 184, 184);
+      }
+
+      /* 下部分文本样式 */
+      .box span {
+        font-size: 1em;
+        text-align: center;
+      }
+
+      .block {
+        display: none;
+        position: fixed;
+        z-index: 1;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0, 0, 0, 0.4);
+      }
+      .blockContent {
+        position: relative;
+        margin: 15% auto;
+        padding: 20px;
+        width: 80%;
+        max-width: 600px;
+        background-color: white;
+      }
+      .close {
+        position: absolute;
+        right: 10px;
+        top: 5px;
+        color: #aaa;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h1 class="title">Home Automation Monitoring Board</h1>
+    <div class="container">
+      <div class="box tempBox">
+        <p class="tempData">$temp</p>
+        <button class="tempBtn" type="button"></button>
+        <br />
+        <span>Temperature</span>
+      </div>
+      <div class="box humiBox">
+        <p class="humiData">$humi</p>
+        <button class="humiBtn" type="button"></button>
+        <br />
+        <span>Humidity</span>
+      </div>
+      <div class="box">
+        <p class="gasData">$gas</p>
+        <br />
+        <br />
+        <span>Gas</span>
+      </div>
+      <div class="box">
+        <button onclick="openLight()" class="lightBtn onBtn" type="button">
+          ON
+        </button>
+        <button onclick="closeLight()" class="lightBtn offBtn" type="button">
+          OFF
+        </button>
+        <br />
+        <br />
+        <span>Light</span>
+      </div>
+      <div class="box">
+        <button onclick="openFan()" class="fanBtn onBtn" type="button">
+          ON
+        </button>
+        <button onclick="closeFan()" class="fanBtn offBtn" type="button">
+          OFF
+        </button>
+        <br />
+        <br />
+        <span>Fan</span>
+      </div>
+      <div class="box picBox">
+        <img src="/pic" class="imgData" alt="PIC FROM CAMERA" />
+        <span>CCTV</span>
+      </div>
+    </div>
+
+    <div class="tempBlock block">
+      <div class="blockContent">
+        <span class="tempClose close">&times;</span>
+        <canvas class="tempChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+
+    <div class="humiBlock block">
+      <div class="blockContent">
+        <span class="humiClose close">&times;</span>
+        <canvas class="humiChart" width="400" height="200"></canvas>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      function openLight() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/openL", true);
+            xhttp.send();
+          }
+
+          function closeLight() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/closeL", true);
+            xhttp.send();
+          }
+
+          function openFan() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/openF", true);
+            xhttp.send();
+          }
+
+          function closeFan() {
+            var xhttp = new XMLHttpRequest();
+            xhttp.open("GET", "/closeF", true);
+            xhttp.send();
+          }
+
+          function getData(url, callback) {
+            var xhttp = new XMLHttpRequest();
+            xhttp.onreadystatechange = function () {
+              if (this.readyState === 4 && this.status === 200) {
+                callback(this.responseText);
+              }
+            };
+            xhttp.open("GET", url, true);
+            xhttp.send();
+          }
+
+          //===========================================================
+          class ChartClass {
+            constructor(label, btn, block, chart, chartClose) {
+              this.label = label;
+              this.btn = document.querySelector(btn);
+              this.block = document.querySelector(block);
+              this.chart = document.querySelector(chart).getContext("2d");
+              this.chartClose = document.querySelector(chartClose);
+              this.chartArray = [0, 0, 0, 0, 0, 0, 0];
+            }
+            //
+            addEventToAll() {
+              this.btn.addEventListener("click", () => {
+                const tempChartImg = new Chart(this.chart, {
+                  type: "line", // 设置图表类型为 'line'
+                  data: {
+                    labels: ["6H", "5H", "4H", "3H", "2H", "1H", "NOW"],
+                    datasets: [
+                      {
+                        label: this.label,
+                        data: this.chartArray,
+                        backgroundColor: "rgba(75, 192, 192, 0.2)",
+                        borderColor: "rgba(75, 192, 192, 1)",
+                        borderWidth: 2,
+                        tension: 0.2, // 设置线条平滑度
+                        fill: false, // 不填充区域
+                      },
+                    ],
+                  },
+                });
+                this.block.style.display = "block";
+              });
+
+              this.chartClose.addEventListener("click", () => {
+                this.block.style.display = "none";
+              });
+            }
+
+            //
+            updateArray() {}
+          }
+
+          tempClass = new ChartClass(
+            "Temperature",
+            ".tempBtn",
+            ".tempBlock",
+            ".tempChart",
+            ".tempClose"
+          );
+          tempClass.addEventToAll();
+
+          humiClass = new ChartClass(
+            "Humidity",
+            ".humiBtn",
+            ".humiBlock",
+            ".humiChart",
+            ".humiClose"
+          );
+          humiClass.addEventToAll();
+    </script>
+  </body>
+</html>
